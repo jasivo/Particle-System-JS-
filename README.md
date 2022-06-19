@@ -1,4 +1,4 @@
-# Particle-System-JS-
+# Particle_System_JS
 Celem projektu było wykonanie własnego systemu cząsteczkowego oraz prezentacja za jego pomocą sceny świątecznej.
 
 Przedmiot: Modelowanie fizyczne w animacji komputerowej
