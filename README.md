@@ -1,6 +1,8 @@
 # Particle-System-JS-
 Celem projektu było wykonanie własnego systemu cząsteczkowego oraz prezentacja za jego pomocą sceny świątecznej.
 
+Przedmiot: Modelowanie fizyczne w animacji komputerowej
+
 Pracę rozpocząłem od stworzenia systemu cząsteczkowego 2D z pomocą biblioteki p5.js.
 Przy pracy posiłkowałem się przykładem ze strony:
 https://p5js.org/examples/simulate-particle-system.html
