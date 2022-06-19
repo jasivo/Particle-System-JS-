@@ -1,0 +1,242 @@
+<html>
+    
+    <head>
+        <title> Paweł Jurkiw - Particle System</title>
+    </head>
+    <style>
+        body {margin: 0;}
+        canvas {width: 100%; height:100%};
+    </style>
+    
+    <body>
+        <script src="js/three.js"></script>
+        <!-- <script src="js/p5.js"></script> -->
+
+        <script>
+
+            const radius = 10;
+            const segments = 15;
+            const rings = 15;
+            var time;
+            var dt;
+
+            function getRandomInt(min, max) {
+                min = Math.ceil(min);
+                max = Math.floor(max);
+                return Math.floor(Math.random() * (max - min)) + min;
+            }
+
+            // Czasteczka
+            class Particle
+            {
+                constructor(x,y,z,type)
+                {   
+                    this.type = type;
+                    switch(this.type)
+                    {
+                        case "fireworks":
+                            this.velocity = new THREE.Vector3(THREE.MathUtils.randFloat(-1, 1), THREE.MathUtils.randFloat(-1,1), THREE.MathUtils.randFloat(-0.1,0.1));
+                            //this.acceleration = new THREE.Vector3(0,0,0);
+                            let col = getRandomInt(1,4);
+                            switch(col)
+                            {
+                                case 1:
+                                    this.material = new THREE.MeshStandardMaterial({
+                                    color: 'rgb(0,255,60)',});
+                                    break;
+                                case 2:
+                                    this.material = new THREE.MeshStandardMaterial({
+                                    color: 'rgb(255,0,0)',});
+                                    break;
+                                case 3:
+                                    this.material = new THREE.MeshStandardMaterial({
+                                    color: 'rgb(255,255,0)',});
+                                    break;
+                            }
+                            this.lifetime = 130;
+                            break;
+                        case "snow":
+                            this.velocity = new THREE.Vector3(THREE.MathUtils.randFloat(-1.8, 1.8), THREE.MathUtils.randFloat(-2, -1), THREE.MathUtils.randFloat(-1,0.3));
+                            //this.acceleration = new THREE.Vector3(0,-20,0);
+                            this.material = new THREE.MeshStandardMaterial({
+                                color: 'rgb(255,250,250)',});
+                            this.lifetime = 500;
+                            break;
+                    }
+                    this.geometry = new THREE.SphereGeometry(radius, segments, rings);
+                    this.mesh = new THREE.Mesh(this.geometry, this.material);
+                    this.mesh.position.set(x,y,z);
+                }
+
+                addPosition(x,y,z)
+                {
+                    this.mesh.position.x += x;
+                    this.mesh.position.y += y;
+                    this.mesh.position.z += z;
+                }
+
+                update()
+                {
+                    dt = (Date.now() - time) * 0.1;
+                    time = Date.now();
+                    //this.velocity.add(this.acceleration.clone().multiplyScalar(dt));
+                    this.mesh.position.add(this.velocity);
+                    this.lifetime -= 1;
+                }
+
+                display()
+                {
+                    scene.add(this.mesh);
+                }
+             
+                isDead()
+                {
+                    return this.lifetime <= 0;
+                }
+
+                kill()
+                {
+                    scene.remove(this.mesh);
+                }
+
+                run()
+                {
+                    this.update();
+                    this.display();
+                }
+            }
+
+            //Emiter
+            class Emiter
+            {
+                constructor(position,type)
+                {
+                    this.x = position.x;
+                    this.y = position.y;
+                    this.z = position.z;
+                    this.particles = [];
+                    this.type = type;
+                }
+
+                addParticle()
+                {
+                    this.particles.push(new Particle(this.x,this.y,this.z,this.type));
+                }
+
+                run()
+                {
+                    for(let i = 0; i < this.particles.length; i++)
+                    {
+                        let particle = this.particles[i];
+                        particle.run();
+                        if(particle.isDead())
+                        {
+                            this.particles[i].kill();
+                            this.particles.splice(i,1);
+                        }
+                    }
+
+                }
+            }
+
+            class Snowman
+            {
+                constructor(x,y,z)
+                {
+                    this.sphere1 = new THREE.SphereGeometry(60, 40, 40);
+                    this.sphere2 = new THREE.SphereGeometry(80, 40, 40);
+                    this.sphere3 = new THREE.SphereGeometry(100, 40, 40);
+                    this.button_sphere = new THREE.SphereGeometry(15, 12, 12);
+                    this.eye_sphere = new THREE.SphereGeometry(10, 12, 12);
+                    this.material = new THREE.MeshStandardMaterial({
+                        color: 'rgb(255,255,255)',});
+                    this.material2 = new THREE.MeshStandardMaterial({
+                        color: 'rgb(80,80,80)',});
+                    this.mesh1 = new THREE.Mesh( this.sphere1, this.material );     
+                    this.mesh2 = new THREE.Mesh( this.sphere2, this.material );  
+                    this.mesh3 = new THREE.Mesh( this.sphere3, this.material );
+                    this.button1 = new THREE.Mesh( this.button_sphere, this.material2 );
+                    this.button2 = new THREE.Mesh( this.button_sphere, this.material2 );
+                    this.eye1 = new THREE.Mesh( this.eye_sphere, this.material2 );
+                    this.eye2 = new THREE.Mesh( this.eye_sphere, this.material2 );
+                    this.mouth = new THREE.Mesh( this.button_sphere, this.material2 );
+                    this.mesh1.position.set(x,y+275,z);
+                    this.mesh2.position.set(x,y+150,z);
+                    this.mesh3.position.set(x,y,z);
+                    this.button1.position.set(x-30,y+30,z+95);  
+                    this.button2.position.set(x-25,y+150,z+75);
+                    this.eye1.position.set(x,y+280,z+55);
+                    this.eye2.position.set(x-40,y+282,z+40);
+                    this.mouth.position.set(x-20,y+260,z+50);
+                }
+
+                display()
+                {
+                    scene.add(this.mesh3);
+                    scene.add(this.mesh2);
+                    scene.add(this.mesh1);
+                    scene.add(this.button1);
+                    scene.add(this.button2);
+                    scene.add(this.eye1);
+                    scene.add(this.eye2);
+                    scene.add(this.mouth);
+                }
+            }
+
+            function init() {
+
+                // Kamera
+                scene = new THREE.Scene()
+                scene.background = new THREE.Color( 0x5a9afe );
+                camera = new THREE.PerspectiveCamera(75, window.innerWidth / innerHeight, 0.1, 1000);
+                camera.position.z = 500;
+                
+                var light = new THREE.PointLight(0xffffff, 1, Infinity);
+                camera.add(light);
+                scene.add(camera);
+
+                // Renderer
+                renderer = new THREE.WebGLRenderer();
+                renderer.setSize(window.innerWidth, window.innerHeight);
+                document.body.appendChild(renderer.domElement);
+
+                time = Date.now();
+
+            }
+
+            //emitery mozna przechowac w tablicy, jednak dla tylko 4 elementow tego nie robilem
+            var emiter_snow = new Emiter(new THREE.Vector3(0,600,100),"snow");
+            var emiter2 = new Emiter(new THREE.Vector3(700,250,-300),"fireworks");
+            var emiter3 = new Emiter(new THREE.Vector3(-600,100,-200),"fireworks");
+            var emiter4 = new Emiter(new THREE.Vector3(0,350,-250),"fireworks");
+            var snowman = new Snowman(200,-200,-100);
+
+            function render() {
+                emiter_snow.addParticle();
+                emiter_snow.run();
+                emiter2.addParticle();
+                emiter2.run();
+                emiter3.addParticle();
+                emiter3.run();
+                emiter4.addParticle();
+                emiter4.run();
+                snowman.display();
+                renderer.render(scene, camera);
+            }
+
+            function animate() {
+                requestAnimationFrame(animate);
+                render();
+            }
+
+            function drawParticle() {
+                init();
+                animate();
+            }
+
+            drawParticle();
+
+        </script>
+    </body>
+
+</html>
